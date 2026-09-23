@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# Local SQLite databases & logs
+server/data/*.db
+server/data/*.db-wal
+server/data/*.db-shm
+*.log
+
+# Netlify Build cache & state
+.netlify/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

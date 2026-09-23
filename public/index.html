@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskOrbit — Enterprise Task & Workflow Management</title>
+  <meta name="description" content="Professional, fully functional task management platform with Kanban, Table, and Analytics powered by Node.js, Express microservices, and SQLite.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="light-theme">
+
+  <div class="app-container">
+    
+    <!-- Top App Navigation Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-wrap">
+            <h1 class="brand-title">TaskOrbit</h1>
+            <span class="badge-pro">Platform v2.0</span>
+          </div>
+          <div class="brand-subtitle">
+            <span id="db-type-label">Neon PostgreSQL</span>
+            <span>&bull;</span>
+            <span class="status-indicator">
+              <span class="pulse-dot"></span>
+              <span id="backend-status">Connected (Live)</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Activity Log Drawer Toggle -->
+        <button id="btn-activity-toggle" class="btn btn-secondary" title="View activity audit trail">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Activity
+          <span id="activity-badge-count" class="badge-count">0</span>
+        </button>
+
+        <!-- Export Dropdown -->
+        <div class="dropdown-wrapper">
+          <button id="btn-export" class="btn btn-secondary dropdown-trigger" title="Export tasks data" aria-haspopup="true" aria-expanded="false">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Export</span>
+            <svg class="dropdown-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div id="export-menu" class="dropdown-menu" style="display: none;" role="menu">
+            <div class="dropdown-menu-header">Export Tasks Dataset</div>
+            <button type="button" class="dropdown-item" id="export-csv-btn" role="menuitem">
+              <div class="dropdown-item-icon icon-csv">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Export as CSV</span>
+                <span class="dropdown-item-desc">Spreadsheet & Excel compatible table (.csv)</span>
+              </div>
+            </button>
+            <button type="button" class="dropdown-item" id="export-json-btn" role="menuitem">
+              <div class="dropdown-item-icon icon-json">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                </svg>
+              </div>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Export as JSON</span>
+                <span class="dropdown-item-desc">Structured raw API object format (.json)</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Reset Demo -->
+        <button id="btn-seed" class="btn btn-secondary" title="Reset and seed sample database records">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reset Demo
+        </button>
+
+        <!-- New Task Button -->
+        <button id="btn-create-task" class="btn btn-primary" title="Create a new task (Press 'N')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          New Task
+        </button>
+      </div>
+    </header>
+
+    <!-- Analytics & KPI Metrics Row -->
+    <section class="metrics-grid" aria-label="Task Analytics Summary">
+      <div class="metric-card">
+        <div class="metric-icon-box metric-icon-blue">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">Total Pipeline</span>
+          <div class="metric-value-wrap">
+            <span id="metric-total" class="metric-value">--</span>
+            <span class="metric-subtext">Active tasks</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box metric-icon-amber">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">In Progress</span>
+          <div class="metric-value-wrap">
+            <span id="metric-inprogress" class="metric-value">--</span>
+            <span class="metric-subtext">Underway</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box metric-icon-emerald">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="metric-info" style="flex: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span class="metric-label">Completion Rate</span>
+            <span id="metric-rate-text" class="metric-highlight-green">0%</span>
+          </div>
+          <span id="metric-completed" class="metric-value">--</span>
+          <div class="metric-progress-wrapper">
+            <div id="metric-progress-bar" class="metric-progress-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box metric-icon-rose">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">Urgent / Needs Action</span>
+          <div class="metric-value-wrap">
+            <span id="metric-urgent" class="metric-value">--</span>
+            <span id="metric-overdue-chip" class="badge-overdue" style="display: none;">0 overdue</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter & Controls Toolbar -->
+    <nav class="toolbar" aria-label="Task Filters and View Modes">
+      <div class="search-box">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Search tasks, descriptions, or subtasks... (Press '/')" autocomplete="off">
+        <button id="search-clear-btn" class="search-clear" style="display: none;" title="Clear search">&times;</button>
+      </div>
+
+      <div class="filters-group">
+        <select id="filter-category" class="select-filter" aria-label="Filter by Category">
+          <option value="all">All Categories</option>
+          <option value="Engineering">Engineering</option>
+          <option value="Design">Design</option>
+          <option value="Product">Product</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Operations">Operations</option>
+        </select>
+
+        <select id="filter-priority" class="select-filter" aria-label="Filter by Priority">
+          <option value="all">All Priorities</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+
+        <select id="sort-by" class="select-filter" aria-label="Sort Order">
+          <option value="created_at">Sort: Newest First</option>
+          <option value="due_date">Sort: Due Date</option>
+          <option value="priority">Sort: Priority Level</option>
+          <option value="title">Sort: Title (A-Z)</option>
+        </select>
+      </div>
+
+      <div class="view-toggle" role="group" aria-label="Display View">
+        <button id="view-kanban-btn" class="toggle-btn active" title="Kanban Board View (Press '1')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+          </svg>
+          Kanban
+        </button>
+        <button id="view-table-btn" class="toggle-btn" title="Table Grid View (Press '2')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Table
+        </button>
+        <button id="view-analytics-btn" class="toggle-btn" title="Analytics & Insights (Press '3')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Analytics
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+      
+      <!-- 1. Kanban Board View -->
+      <section id="kanban-view" class="kanban-board" aria-label="Task Status Columns">
+        
+        <!-- Column 1: Todo -->
+        <div class="kanban-column" data-status="todo">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-pill pill-todo"></span>
+              <h2 class="column-title">To Do</h2>
+            </div>
+            <span class="column-count" id="count-todo">0</span>
+          </div>
+          <div class="column-cards-container" id="cards-todo"></div>
+        </div>
+
+        <!-- Column 2: In Progress -->
+        <div class="kanban-column" data-status="in_progress">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-pill pill-inprogress"></span>
+              <h2 class="column-title">In Progress</h2>
+            </div>
+            <span class="column-count" id="count-in_progress">0</span>
+          </div>
+          <div class="column-cards-container" id="cards-in_progress"></div>
+        </div>
+
+        <!-- Column 3: Review -->
+        <div class="kanban-column" data-status="review">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-pill pill-review"></span>
+              <h2 class="column-title">Under Review</h2>
+            </div>
+            <span class="column-count" id="count-review">0</span>
+          </div>
+          <div class="column-cards-container" id="cards-review"></div>
+        </div>
+
+        <!-- Column 4: Completed -->
+        <div class="kanban-column" data-status="completed">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-pill pill-completed"></span>
+              <h2 class="column-title">Completed</h2>
+            </div>
+            <span class="column-count" id="count-completed">0</span>
+          </div>
+          <div class="column-cards-container" id="cards-completed"></div>
+        </div>
+
+      </section>
+
+      <!-- 2. Table / List View (Hidden by default) -->
+      <section id="table-view" class="table-view-container" style="display: none;" aria-label="Task Data Table">
+        <div class="table-card">
+          <table class="tasks-table">
+            <thead>
+              <tr>
+                <th data-sort="title" class="sortable-header">Task Title & Details <span class="sort-icon">↕</span></th>
+                <th data-sort="category" class="sortable-header">Category <span class="sort-icon">↕</span></th>
+                <th data-sort="priority" class="sortable-header">Priority <span class="sort-icon">↕</span></th>
+                <th data-sort="status" class="sortable-header">Status <span class="sort-icon">↕</span></th>
+                <th>Subtasks</th>
+                <th data-sort="due_date" class="sortable-header">Due Date <span class="sort-icon">↕</span></th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-rows">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. Analytics & Insights View (Hidden by default) -->
+      <section id="analytics-view" class="analytics-view-container" style="display: none;" aria-label="Analytics Dashboard">
+        <div class="analytics-grid">
+          
+          <!-- Category Distribution Card -->
+          <div class="analytics-card">
+            <div class="card-head">
+              <h3>Category Breakdown</h3>
+              <span class="card-sub">Task distribution by department</span>
+            </div>
+            <div id="analytics-category-bars" class="analytics-bars-wrap">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Priority Matrix Card -->
+          <div class="analytics-card">
+            <div class="card-head">
+              <h3>Priority Distribution</h3>
+              <span class="card-sub">Urgency and triage balance</span>
+            </div>
+            <div id="analytics-priority-bars" class="analytics-bars-wrap">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Pipeline Health & Velocity -->
+          <div class="analytics-card">
+            <div class="card-head">
+              <h3>Pipeline Flow</h3>
+              <span class="card-sub">Status stage distribution</span>
+            </div>
+            <div id="analytics-status-bars" class="analytics-bars-wrap">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Quick Summary Card -->
+          <div class="analytics-card summary-highlight-card">
+            <div class="card-head">
+              <h3>Productivity Insight</h3>
+              <span class="card-sub">Real-time health overview</span>
+            </div>
+            <div class="insight-stat-body">
+              <div class="insight-gauge">
+                <svg viewBox="0 0 36 36" class="circular-chart">
+                  <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path id="insight-circle-fill" class="circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <text x="18" y="20.35" class="percentage" id="insight-percentage-text">0%</text>
+                </svg>
+              </div>
+              <div class="insight-text">
+                <h4 id="insight-summary-title">Pipeline on Track</h4>
+                <p id="insight-summary-desc">Tasks are advancing smoothly through development stages.</p>
+                <div class="shortcut-tip">
+                  <span>💡 Tip: Press <kbd>N</kbd> anywhere to quickly draft a new task.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Slide-over Activity Log Drawer -->
+  <aside id="activity-drawer" class="activity-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h2>Activity Audit Trail</h2>
+      </div>
+      <button type="button" class="btn-icon-only" id="activity-drawer-close" aria-label="Close activity drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="activity-logs-container">
+      <!-- Injected via JavaScript -->
+    </div>
+  </aside>
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+  <!-- Modal: Create / Edit Task -->
+  <dialog id="modal-task" aria-labelledby="modal-task-title">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <h2 id="modal-task-title" class="modal-title">Create New Task</h2>
+        <span class="modal-subtitle">Specify requirements, checklist, and deadlines</span>
+      </div>
+      <button type="button" class="btn-icon-only" id="modal-task-close" aria-label="Close dialog">&times;</button>
+    </div>
+    <form id="task-form">
+      <input type="hidden" id="task-form-id" name="id" value="">
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label class="form-label" for="task-form-title">Task Title <span class="required">*</span></label>
+          <input type="text" id="task-form-title" name="title" class="form-input" placeholder="e.g. Implement OAuth2.0 Token Revocation" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-form-desc">Description</label>
+          <textarea id="task-form-desc" name="description" class="form-textarea" placeholder="Detail specifications, requirements, or dependencies..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="task-form-category">Category</label>
+            <select id="task-form-category" name="category" class="form-select">
+              <option value="Engineering">Engineering</option>
+              <option value="Design">Design</option>
+              <option value="Product">Product</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Operations">Operations</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-form-priority">Priority</label>
+            <select id="task-form-priority" name="priority" class="form-select">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="task-form-status">Initial Status</label>
+            <select id="task-form-status" name="status" class="form-select">
+              <option value="todo" selected>To Do</option>
+              <option value="in_progress">In Progress</option>
+              <option value="review">Under Review</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-form-due">Due Date</label>
+            <input type="date" id="task-form-due" name="due_date" class="form-input">
+          </div>
+        </div>
+
+        <!-- Checklist Builder -->
+        <div class="form-group checklist-builder-group">
+          <label class="form-label">Subtasks / Checklist</label>
+          <div class="checklist-input-row">
+            <input type="text" id="checklist-new-input" class="form-input" placeholder="Add a subtask item... (Press Enter)">
+            <button type="button" id="checklist-add-btn" class="btn btn-secondary">Add</button>
+          </div>
+          <div id="checklist-items-list" class="checklist-items-list">
+            <!-- Dynamic checklist items -->
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modal-task-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="modal-task-submit">Save Task</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: View Task Details -->
+  <dialog id="modal-details" aria-labelledby="modal-details-title">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <h2 id="modal-details-title" class="modal-title">Task Details</h2>
+        <span id="modal-details-meta" class="modal-subtitle"></span>
+      </div>
+      <button type="button" class="btn-icon-only" id="modal-details-close" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-details-body">
+      <!-- Injected via JavaScript -->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="modal-details-edit-btn">Edit Task</button>
+      <button type="button" class="btn btn-primary" id="modal-details-done-btn">Done</button>
+    </div>
+  </dialog>
+
+  <!-- Modal: Confirm Delete -->
+  <dialog id="modal-delete" aria-labelledby="modal-delete-title">
+    <div class="modal-header">
+      <h2 id="modal-delete-title" class="modal-title text-danger">Delete Task</h2>
+      <button type="button" class="btn-icon-only" id="modal-delete-close" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="delete-warning-text">Are you sure you want to permanently delete this task? This action cannot be undone.</p>
+      <div id="delete-task-preview" class="delete-preview-box"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="modal-delete-cancel">Cancel</button>
+      <button type="button" class="btn btn-danger" id="modal-delete-confirm">Delete Task</button>
+    </div>
+  </dialog>
+
+  <!-- Floating Toast Notifications -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Application Logic -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

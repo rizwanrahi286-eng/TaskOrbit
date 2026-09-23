@@ -1,0 +1,29 @@
+{
+  "name": "interactive-task-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive Dynamic Task Dashboard Platform with Express, SQLite, and Modern Async Frontend",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node test/api.test.js"
+  },
+  "keywords": [
+    "task",
+    "dashboard",
+    "crud",
+    "microservice",
+    "sqlite"
+  ],
+  "author": "Antigravity",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^18.0.3",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.23.0",
+    "serverless-http": "^4.0.0"
+  }
+}
